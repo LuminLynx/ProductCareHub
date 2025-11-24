@@ -27,6 +27,13 @@ export const products = pgTable("products", {
   receiptUrl: text("receipt_url"),
   photoUrls: text("photo_urls").array().default(sql`'{}'::text[]`),
   notes: text("notes"),
+  // Warranty extension fields
+  hasExtension: boolean("has_extension").default(false),
+  extendedExpirationDate: timestamp("extended_expiration_date"),
+  insuranceProvider: text("insurance_provider"),
+  agentName: text("agent_name"),
+  policyNumber: text("policy_number"),
+  extensionCost: integer("extension_cost"), // in cents
 });
 
 // Reviews table - product ratings and reviews

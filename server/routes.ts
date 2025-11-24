@@ -603,6 +603,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // WARRANTY EXTENSION ROUTE
+  app.post("/api/products/:id/extension", async (req, res) => {
+    try {
+      const { extendedExpirationDate, insuranceProvider, agentName, policyNumber, extensionCost } = req.body;
+      
+      if (!extendedExpirationDate || !insuranceProvider || !policyNumber) {
+        return res.status(400).json({ error: "Campos obrigatórios em falta" });
+      }
+
+      const product = await storage.addWarrantyExtension(req.params.id, {
+        extendedExpirationDate: new Date(extendedExpirationDate),
+        insuranceProvider,
+        agentName: agentName || "",
+        policyNumber,
+        extensionCost: extensionCost || 0,
+      });
+
+      if (!product) {
+        return res.status(404).json({ error: "Produto não encontrado" });
+      }
+
+      res.json(product);
+    } catch (error) {
+      res.status(500).json({ error: "Falha ao adicionar extensão de garantia" });
+    }
+  });
+
   // WARRANTY CERTIFICATE PDF
   app.get("/api/products/:id/certificate/pdf", async (req, res) => {
     try {

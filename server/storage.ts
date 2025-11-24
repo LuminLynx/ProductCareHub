@@ -73,6 +73,15 @@ export interface IStorage {
   getFavoriteProviders(): Promise<string[]>;
   toggleFavorite(type: 'product' | 'provider', targetId: string): Promise<boolean>;
   isFavorite(type: 'product' | 'provider', targetId: string): Promise<boolean>;
+
+  // Warranty Extensions
+  addWarrantyExtension(id: string, extension: {
+    extendedExpirationDate: Date;
+    insuranceProvider: string;
+    agentName: string;
+    policyNumber: string;
+    extensionCost?: number;
+  }): Promise<Product | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -310,6 +319,33 @@ export class MemStorage implements IStorage {
     supportRequests.forEach(request => this.supportRequests.delete(request.id));
 
     return this.products.delete(id);
+  }
+
+  async addWarrantyExtension(
+    id: string,
+    extension: {
+      extendedExpirationDate: Date;
+      insuranceProvider: string;
+      agentName: string;
+      policyNumber: string;
+      extensionCost?: number;
+    }
+  ): Promise<Product | undefined> {
+    const product = this.products.get(id);
+    if (!product) return undefined;
+
+    const updated: Product = {
+      ...product,
+      hasExtension: true,
+      extendedExpirationDate: extension.extendedExpirationDate,
+      insuranceProvider: extension.insuranceProvider,
+      agentName: extension.agentName,
+      policyNumber: extension.policyNumber,
+      extensionCost: extension.extensionCost || 0,
+      warrantyExpiration: extension.extendedExpirationDate,
+    };
+    this.products.set(id, updated);
+    return updated;
   }
 
   // Reviews

@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
-import { Package, Users, History, BarChart3 } from "lucide-react";
+import { Package, Users, History, BarChart3, Shield } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/dashboard";
@@ -21,6 +21,7 @@ import ServiceProviders from "@/pages/service-providers";
 import RegisterProvider from "@/pages/register-provider";
 import Analytics from "@/pages/analytics";
 import WarrantyCertificate from "@/pages/warranty-certificate";
+import InsuranceExtensions from "@/pages/insurance-extensions";
 
 function Router() {
   return (
@@ -37,6 +38,7 @@ function Router() {
       <Route path="/provedores/registar" component={RegisterProvider} />
       <Route path="/analytics" component={Analytics} />
       <Route path="/certificado/:id" component={WarrantyCertificate} />
+      <Route path="/extensoes-garantia" component={InsuranceExtensions} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -125,6 +127,16 @@ function Navigation() {
               >
                 <BarChart3 className="h-4 w-4 mr-2" />
                 Analytics
+              </Button>
+            </Link>
+            <Link href="/extensoes-garantia">
+              <Button
+                variant={isActive("/extensoes") ? "secondary" : "ghost"}
+                size="sm"
+                data-testid="nav-extensions"
+              >
+                <Shield className="h-4 w-4 mr-2" />
+                Extensões
               </Button>
             </Link>
           </nav>
