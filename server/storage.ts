@@ -245,6 +245,13 @@ export class MemStorage implements IStorage {
         website: "https://www.hoover.pt/",
         category: "Eletrodomésticos",
       },
+      {
+        name: "Haier",
+        supportEmail: "service.pt@haier.com",
+        supportPhone: "+351-214-250-500",
+        website: "https://www.haier.pt/",
+        category: "Eletrodomésticos",
+      },
     ];
 
     brands.forEach((brand) => {
