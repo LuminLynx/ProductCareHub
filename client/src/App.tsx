@@ -17,6 +17,8 @@ import Brands from "@/pages/brands";
 import Community from "@/pages/community";
 import SupportHistory from "@/pages/support-history";
 import CreateBrand from "@/pages/create-brand";
+import ServiceProviders from "@/pages/service-providers";
+import RegisterProvider from "@/pages/register-provider";
 
 function Router() {
   return (
@@ -29,6 +31,8 @@ function Router() {
       <Route path="/marcas/criar" component={CreateBrand} />
       <Route path="/comunidade" component={Community} />
       <Route path="/historico-reclamacoes" component={SupportHistory} />
+      <Route path="/provedores" component={ServiceProviders} />
+      <Route path="/provedores/registar" component={RegisterProvider} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -97,6 +101,16 @@ function Navigation() {
               >
                 <History className="h-4 w-4 mr-2" />
                 Histórico
+              </Button>
+            </Link>
+            <Link href="/provedores">
+              <Button
+                variant={isActive("/provedores") ? "secondary" : "ghost"}
+                size="sm"
+                data-testid="nav-providers"
+              >
+                <Users className="h-4 w-4 mr-2" />
+                Provedores
               </Button>
             </Link>
           </nav>

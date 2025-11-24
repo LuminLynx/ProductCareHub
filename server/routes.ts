@@ -2,8 +2,9 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import multer from "multer";
 import path from "path";
+import PDFDocument from "pdfkit";
 import { storage } from "./storage";
-import { insertBrandSchema, insertProductSchema, insertReviewSchema, insertSupportRequestSchema } from "@shared/schema";
+import { insertBrandSchema, insertProductSchema, insertReviewSchema, insertSupportRequestSchema, insertServiceProviderSchema, insertServiceProviderReviewSchema } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
 
 // Configure multer for file uploads
@@ -370,6 +371,146 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ products, brands });
     } catch (error) {
       res.status(500).json({ error: "Failed to search" });
+    }
+  });
+
+  // SERVICE PROVIDERS ROUTES
+  app.get("/api/service-providers", async (req, res) => {
+    try {
+      const district = req.query.district as string;
+      const providers = district 
+        ? await storage.getServiceProvidersByDistrict(district)
+        : await storage.getAllServiceProviders();
+      res.json(providers);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch service providers" });
+    }
+  });
+
+  app.get("/api/service-providers/:id", async (req, res) => {
+    try {
+      const provider = await storage.getServiceProvider(req.params.id);
+      if (!provider) {
+        return res.status(404).json({ error: "Service provider not found" });
+      }
+      const reviews = await storage.getServiceProviderReviews(req.params.id);
+      res.json({ ...provider, reviews });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch service provider" });
+    }
+  });
+
+  app.post("/api/service-providers", async (req, res) => {
+    try {
+      const result = insertServiceProviderSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ error: fromZodError(result.error).message });
+      }
+      const provider = await storage.createServiceProvider(result.data);
+      res.status(201).json(provider);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create service provider" });
+    }
+  });
+
+  app.patch("/api/service-providers/:id", async (req, res) => {
+    try {
+      const provider = await storage.updateServiceProvider(req.params.id, req.body);
+      if (!provider) {
+        return res.status(404).json({ error: "Service provider not found" });
+      }
+      res.json(provider);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update service provider" });
+    }
+  });
+
+  app.delete("/api/service-providers/:id", async (req, res) => {
+    try {
+      const success = await storage.deleteServiceProvider(req.params.id);
+      if (!success) {
+        return res.status(404).json({ error: "Service provider not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete service provider" });
+    }
+  });
+
+  // SERVICE PROVIDER REVIEWS ROUTES
+  app.post("/api/service-provider-reviews", async (req, res) => {
+    try {
+      const result = insertServiceProviderReviewSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ error: fromZodError(result.error).message });
+      }
+      const review = await storage.createServiceProviderReview(result.data);
+      res.status(201).json(review);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create review" });
+    }
+  });
+
+  // NOTIFICATIONS ROUTES
+  app.get("/api/notifications/unsent", async (req, res) => {
+    try {
+      const notifications = await storage.getAllUnsentNotifications();
+      res.json(notifications);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch notifications" });
+    }
+  });
+
+  app.post("/api/notifications/:id/mark-sent", async (req, res) => {
+    try {
+      const success = await storage.markNotificationAsSent(req.params.id);
+      if (!success) {
+        return res.status(404).json({ error: "Notification not found" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to mark notification as sent" });
+    }
+  });
+
+  // PDF EXPORT ROUTE
+  app.get("/api/products/export/pdf", async (req, res) => {
+    try {
+      const products = await storage.getAllProducts();
+      
+      // Create PDF document
+      const doc = new PDFDocument();
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", 'attachment; filename="warranty-report.pdf"');
+      
+      doc.pipe(res);
+      
+      // Title
+      doc.fontSize(24).font("Helvetica-Bold").text("Relatório de Garantias", { align: "center" });
+      doc.fontSize(10).font("Helvetica").text(`Gerado em ${new Date().toLocaleDateString("pt-PT")}`, { align: "center" });
+      doc.moveDown();
+      
+      // Products list
+      products.forEach((product, index) => {
+        const daysRemaining = Math.ceil(
+          (new Date(product.warrantyExpiration).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
+        );
+        const warrantyStatus = daysRemaining < 0 ? "Expirada" : daysRemaining <= 90 ? "Expira em Breve" : "Válida";
+        
+        doc.fontSize(12).font("Helvetica-Bold").text(`${index + 1}. ${product.name}`, { underline: true });
+        doc.fontSize(10).font("Helvetica");
+        doc.text(`Marca: ${product.brand.name}`);
+        doc.text(`Modelo: ${product.model}`);
+        doc.text(`Data de Compra: ${new Date(product.purchaseDate).toLocaleDateString("pt-PT")}`);
+        doc.text(`Expiração da Garantia: ${new Date(product.warrantyExpiration).toLocaleDateString("pt-PT")}`);
+        doc.text(`Estado: ${warrantyStatus}`);
+        doc.text(`Dias Restantes: ${Math.max(daysRemaining, 0)}`);
+        doc.moveDown();
+      });
+      
+      doc.end();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to generate PDF" });
     }
   });
 

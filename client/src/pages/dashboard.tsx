@@ -5,15 +5,16 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { StatsCard } from "@/components/stats-card";
 import { ProductCard } from "@/components/product-card";
-import { Package, CheckCircle, AlertCircle, XCircle, Plus, Search, Filter } from "lucide-react";
+import { Package, CheckCircle, AlertCircle, XCircle, Plus, Search, Filter, Download } from "lucide-react";
 import { Link } from "wouter";
-import type { ProductWithBrand } from "@shared/schema";
+import type { ProductWithBrand, Review } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterBrand, setFilterBrand] = useState<string>("all");
+  const [filterRating, setFilterRating] = useState<string>("all");
 
   const { data: products, isLoading } = useQuery<ProductWithBrand[]>({
     queryKey: ["/api/products"],
@@ -21,6 +22,10 @@ export default function Dashboard() {
 
   const { data: brands } = useQuery({
     queryKey: ["/api/brands"],
+  });
+
+  const { data: allReviews } = useQuery<Review[]>({
+    queryKey: ["/api/community/reviews"],
   });
 
   // Calculate statistics
@@ -50,8 +55,24 @@ export default function Dashboard() {
     
     const matchesBrand = filterBrand === "all" || product.brandId === filterBrand;
     
-    return matchesSearch && matchesStatus && matchesBrand;
+    // Filter by rating
+    let matchesRating = true;
+    if (filterRating !== "all") {
+      const productReviews = allReviews?.filter(r => r.productId === product.id) || [];
+      if (productReviews.length > 0) {
+        const avgRating = Math.round(productReviews.reduce((sum, r) => sum + r.rating, 0) / productReviews.length);
+        matchesRating = avgRating === parseInt(filterRating);
+      } else {
+        matchesRating = filterRating === "0";
+      }
+    }
+    
+    return matchesSearch && matchesStatus && matchesBrand && matchesRating;
   });
+
+  const handleExportPDF = () => {
+    window.location.href = "/api/products/export/pdf";
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -78,43 +99,70 @@ export default function Dashboard() {
           <StatsCard title="Garantias Expiradas" value={expiredWarranties} icon={XCircle} variant="danger" />
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Pesquisar produtos, modelos ou marcas..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-              data-testid="input-search"
-            />
+        {/* Filters and Export */}
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row gap-2 justify-end">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleExportPDF}
+              data-testid="button-export-pdf"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Exportar PDF
+            </Button>
           </div>
-          <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger className="w-full sm:w-48" data-testid="select-filter-status">
-              <Filter className="h-4 w-4 mr-2" />
-              <SelectValue placeholder="Estado da garantia" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os Estados</SelectItem>
-              <SelectItem value="valid">Garantia Válida</SelectItem>
-              <SelectItem value="expiring">Expira em Breve</SelectItem>
-              <SelectItem value="expired">Expirada</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={filterBrand} onValueChange={setFilterBrand}>
-            <SelectTrigger className="w-full sm:w-48" data-testid="select-filter-brand">
-              <SelectValue placeholder="Marca" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas as Marcas</SelectItem>
-              {brands?.map((brand: any) => (
-                <SelectItem key={brand.id} value={brand.id}>
-                  {brand.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Pesquisar produtos, modelos ou marcas..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+                data-testid="input-search"
+              />
+            </div>
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <SelectTrigger className="w-full sm:w-48" data-testid="select-filter-status">
+                <Filter className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Estado da garantia" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os Estados</SelectItem>
+                <SelectItem value="valid">Garantia Válida</SelectItem>
+                <SelectItem value="expiring">Expira em Breve</SelectItem>
+                <SelectItem value="expired">Expirada</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filterBrand} onValueChange={setFilterBrand}>
+              <SelectTrigger className="w-full sm:w-48" data-testid="select-filter-brand">
+                <SelectValue placeholder="Marca" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas as Marcas</SelectItem>
+                {brands?.map((brand: any) => (
+                  <SelectItem key={brand.id} value={brand.id}>
+                    {brand.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={filterRating} onValueChange={setFilterRating}>
+              <SelectTrigger className="w-full sm:w-48" data-testid="select-filter-rating">
+                <SelectValue placeholder="Classificação" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas as Classificações</SelectItem>
+                <SelectItem value="0">Sem avaliações</SelectItem>
+                <SelectItem value="5">5 Estrelas</SelectItem>
+                <SelectItem value="4">4+ Estrelas</SelectItem>
+                <SelectItem value="3">3+ Estrelas</SelectItem>
+                <SelectItem value="2">2+ Estrelas</SelectItem>
+                <SelectItem value="1">1+ Estrela</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {/* Products Grid */}
