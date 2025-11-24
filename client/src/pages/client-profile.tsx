@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { insertClientProfileSchema } from "@shared/schema";
 import { User, Save } from "lucide-react";
 import type { ClientProfile } from "@shared/schema";
@@ -29,6 +30,7 @@ export default function ClientProfile() {
       address: profile?.address || "",
       city: profile?.city || "",
       postalCode: profile?.postalCode || "",
+      country: profile?.country || "PT",
     },
   });
 
@@ -203,6 +205,37 @@ export default function ClientProfile() {
                           {...field}
                           data-testid="input-postal"
                         />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Country */}
+                <FormField
+                  control={form.control}
+                  name="country"
+                  render={({ field }) => (
+                    <FormItem className="md:col-span-2">
+                      <FormLabel>País *</FormLabel>
+                      <FormControl>
+                        <Select value={field.value || "PT"} onValueChange={field.onChange}>
+                          <SelectTrigger data-testid="select-country">
+                            <SelectValue placeholder="Selecione o país" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="PT">Portugal</SelectItem>
+                            <SelectItem value="ES">Espanha</SelectItem>
+                            <SelectItem value="FR">França</SelectItem>
+                            <SelectItem value="IT">Itália</SelectItem>
+                            <SelectItem value="DE">Alemanha</SelectItem>
+                            <SelectItem value="UK">Reino Unido</SelectItem>
+                            <SelectItem value="NL">Países Baixos</SelectItem>
+                            <SelectItem value="BE">Bélgica</SelectItem>
+                            <SelectItem value="GR">Grécia</SelectItem>
+                            <SelectItem value="PL">Polónia</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </FormControl>
                       <FormMessage />
                     </FormItem>

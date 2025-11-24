@@ -12,6 +12,7 @@ export const brands = pgTable("brands", {
   supportPhone: text("support_phone"),
   website: text("website"),
   category: text("category").notNull(), // Electronics, Appliances, etc.
+  countryEmails: text("country_emails"), // JSON: {"PT": "email@pt.com", "ES": "email@es.com"}
 });
 
 // Products table - user's registered products
@@ -114,6 +115,7 @@ export const clientProfile = pgTable("client_profile", {
   address: text("address").notNull(),
   city: text("city").notNull(),
   postalCode: text("postal_code"),
+  country: text("country").default("PT"), // Country code (PT, ES, etc)
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
   updatedAt: timestamp("updated_at").notNull().default(sql`now()`),
 });
