@@ -394,7 +394,7 @@ export class MemStorage implements IStorage {
       },
       {
         name: "Flama",
-        supportEmail: "info@flama.pt",
+        supportEmail: "sat@flama.pt",
         supportPhone: "+351-808-250-178",
         website: "https://www.flama.pt",
         category: "Eletrodomésticos",
