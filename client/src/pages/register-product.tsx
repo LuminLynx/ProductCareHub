@@ -59,9 +59,23 @@ export default function RegisterProduct() {
   const createProduct = useMutation({
     mutationFn: async (data: FormData) => {
       const formData = new FormData();
-      Object.entries(data).forEach(([key, value]) => {
-        if (value) formData.append(key, value.toString());
-      });
+      
+      // Add form fields
+      formData.append("brandId", data.brandId);
+      formData.append("name", data.name);
+      formData.append("model", data.model);
+      formData.append("category", data.category);
+      formData.append("purchaseDate", data.purchaseDate);
+      
+      if (data.serialNumber) {
+        formData.append("serialNumber", data.serialNumber);
+      }
+      if (data.store) {
+        formData.append("store", data.store);
+      }
+      if (data.notes) {
+        formData.append("notes", data.notes);
+      }
       
       if (receiptFile) {
         formData.append("receipt", receiptFile);
@@ -71,7 +85,19 @@ export default function RegisterProduct() {
         formData.append(`photo_${index}`, file);
       });
 
-      return apiRequest("POST", "/api/products", formData);
+      // Send FormData directly without JSON conversion
+      const res = await fetch("/api/products", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        const error = await res.text();
+        throw new Error(error || res.statusText);
+      }
+
+      return res;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
