@@ -36,7 +36,10 @@ export default function SupportRequest() {
   });
 
   const sendSupportRequest = useMutation({
-    mutationFn: (data: any) => apiRequest("POST", "/api/support-requests", data),
+    mutationFn: async (data: any) => {
+      const res = await apiRequest("POST", "/api/support-requests", data);
+      return res.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products", id] });
       toast({
@@ -45,10 +48,11 @@ export default function SupportRequest() {
       });
       setLocation(`/produto/${id}`);
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error("Support request error:", error);
       toast({
         title: "Erro ao enviar pedido",
-        description: "Por favor, tente novamente.",
+        description: error?.message || "Por favor, tente novamente.",
         variant: "destructive",
       });
     },
