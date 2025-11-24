@@ -441,6 +441,13 @@ export class MemStorage implements IStorage {
         website: "https://www.hisense.pt/",
         category: "Eletrodomésticos",
       },
+      {
+        name: "Hitachi",
+        supportEmail: "contacto@hitachi.pt",
+        supportPhone: "+351-212-199-900",
+        website: "https://www.hitachi.eu/en/",
+        category: "Eletrodomésticos",
+      },
     ];
 
     brands.forEach((brand) => {
