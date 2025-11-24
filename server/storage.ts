@@ -19,8 +19,17 @@ import {
   type InsertClientProfile,
   type User,
   type UpsertUser,
+  brands,
+  products,
+  reviews,
+  supportRequests,
+  serviceProviders,
+  clientProfile,
+  users,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
+import { db } from "./db";
+import { eq, like, and } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
