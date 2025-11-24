@@ -413,6 +413,13 @@ export class MemStorage implements IStorage {
         website: "https://www.grow.com.pt/",
         category: "Equipamentos Industriais",
       },
+      {
+        name: "Groundtec",
+        supportEmail: "groundtec@groundtec.com.pt",
+        supportPhone: "+351-227-133-368",
+        website: "https://www.groundtec.com.pt/",
+        category: "Equipamentos Construtivos",
+      },
     ];
 
     brands.forEach((brand) => {
