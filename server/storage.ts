@@ -273,6 +273,13 @@ export class MemStorage implements IStorage {
         website: "https://www.newpool.pt/",
         category: "Eletrodomésticos",
       },
+      {
+        name: "Cata",
+        supportEmail: "info@cnagroup.es",
+        supportPhone: "+34-938-521-818",
+        website: "https://www.cata.com/pt-es/",
+        category: "Eletrodomésticos",
+      },
     ];
 
     brands.forEach((brand) => {
