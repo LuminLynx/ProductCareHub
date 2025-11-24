@@ -151,10 +151,22 @@ export default function RegisterProduct() {
     setPhotoPreviews(photoPreviews.filter((_, i) => i !== index));
   };
 
-  const onSubmit = (data: FormData) => {
-    console.log("Form submitted with data:", data);
+  const onSubmit = () => {
+    const formValues = form.getValues();
+    console.log("Form values:", formValues);
     console.log("Form errors:", form.formState.errors);
-    createProduct.mutate(data);
+    
+    // Validate required fields
+    if (!formValues.brandId || !formValues.name || !formValues.model || !formValues.category || !formValues.purchaseDate) {
+      toast({
+        title: "Erro",
+        description: "Por favor, preencha todos os campos obrigatórios.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    createProduct.mutate(formValues as FormData);
   };
 
   const nextStep = () => setCurrentStep(Math.min(currentStep + 1, STEPS.length));
@@ -205,7 +217,7 @@ export default function RegisterProduct() {
 
         {/* Form */}
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={(e) => { e.preventDefault(); onSubmit(); }} className="space-y-6">
             <Card className="p-6">
               {currentStep === 1 && (
                 <div className="space-y-4">
