@@ -385,6 +385,13 @@ export class MemStorage implements IStorage {
         website: "https://energizer.com/eu/portugal/",
         category: "Baterias e Iluminação",
       },
+      {
+        name: "Energysytem",
+        supportEmail: "garantias.telenets.es",
+        supportPhone: "+34-934-110-700",
+        website: "https://www.energysytem.es/",
+        category: "Eletrónicos",
+      },
     ];
 
     brands.forEach((brand) => {
