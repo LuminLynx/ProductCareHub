@@ -189,6 +189,13 @@ export class MemStorage implements IStorage {
         website: "https://www.mi.com/pt/service/",
         category: "Telefones",
       },
+      {
+        name: "Teka",
+        supportEmail: "servico.cliente@teka.pt",
+        supportPhone: "+351-256-200-100",
+        website: "https://www.teka.pt/servico-tecnico/",
+        category: "Eletrodomésticos",
+      },
     ];
 
     brands.forEach((brand) => {
