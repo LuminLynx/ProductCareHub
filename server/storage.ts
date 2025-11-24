@@ -301,6 +301,13 @@ export class MemStorage implements IStorage {
         website: "https://www.celly.pt/",
         category: "Eletrónicos",
       },
+      {
+        name: "Cecotec",
+        supportEmail: "suporte@cecotec.pt",
+        supportPhone: "+351-300-057-275",
+        website: "https://www.cecotec.pt/",
+        category: "Eletrodomésticos",
+      },
     ];
 
     brands.forEach((brand) => {
