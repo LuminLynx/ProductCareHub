@@ -1,18 +1,104 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, timestamp, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const users = pgTable("users", {
+// Brands table - pre-populated database of manufacturers
+export const brands = pgTable("brands", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+  name: text("name").notNull().unique(),
+  logoUrl: text("logo_url"),
+  supportEmail: text("support_email").notNull(),
+  supportPhone: text("support_phone"),
+  website: text("website"),
+  category: text("category").notNull(), // Electronics, Appliances, etc.
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
+// Products table - user's registered products
+export const products = pgTable("products", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  brandId: varchar("brand_id").notNull().references(() => brands.id),
+  name: text("name").notNull(),
+  model: text("model").notNull(),
+  serialNumber: text("serial_number"),
+  category: text("category").notNull(),
+  purchaseDate: timestamp("purchase_date").notNull(),
+  warrantyExpiration: timestamp("warranty_expiration").notNull(),
+  receiptUrl: text("receipt_url"),
+  photoUrls: text("photo_urls").array().default(sql`'{}'::text[]`),
+  notes: text("notes"),
 });
 
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
+// Reviews table - product ratings and reviews
+export const reviews = pgTable("reviews", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  productId: varchar("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),
+  rating: integer("rating").notNull(), // 1-5 stars
+  title: text("title"),
+  content: text("content"),
+  pros: text("pros").array().default(sql`'{}'::text[]`),
+  cons: text("cons").array().default(sql`'{}'::text[]`),
+  recommend: boolean("recommend").default(true),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+});
+
+// Support requests table - warranty claims and support history
+export const supportRequests = pgTable("support_requests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  productId: varchar("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),
+  issueDescription: text("issue_description").notNull(),
+  category: text("category").notNull(), // malfunction, defect, damage, other
+  severity: text("severity").notNull(), // low, medium, high
+  status: text("status").notNull().default("pending"), // pending, sent, resolved
+  emailSentAt: timestamp("email_sent_at"),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+});
+
+// Insert schemas with validation
+export const insertBrandSchema = createInsertSchema(brands).omit({
+  id: true,
+});
+
+export const insertProductSchema = createInsertSchema(products).omit({
+  id: true,
+  warrantyExpiration: true, // Calculated on backend
+}).extend({
+  purchaseDate: z.string().or(z.date()), // Accept both formats
+  receiptUrl: z.string().nullable().optional(),
+  photoUrls: z.array(z.string()).optional(),
+});
+
+export const insertReviewSchema = createInsertSchema(reviews).omit({
+  id: true,
+  createdAt: true,
+}).extend({
+  rating: z.number().min(1).max(5),
+});
+
+export const insertSupportRequestSchema = createInsertSchema(supportRequests).omit({
+  id: true,
+  createdAt: true,
+  emailSentAt: true,
+  status: true,
+});
+
+// Types
+export type Brand = typeof brands.$inferSelect;
+export type InsertBrand = z.infer<typeof insertBrandSchema>;
+
+export type Product = typeof products.$inferSelect;
+export type InsertProduct = z.infer<typeof insertProductSchema>;
+
+export type Review = typeof reviews.$inferSelect;
+export type InsertReview = z.infer<typeof insertReviewSchema>;
+
+export type SupportRequest = typeof supportRequests.$inferSelect;
+export type InsertSupportRequest = z.infer<typeof insertSupportRequestSchema>;
+
+// Extended types with relations
+export type ProductWithBrand = Product & { brand: Brand };
+export type ProductWithDetails = Product & {
+  brand: Brand;
+  reviews: Review[];
+  supportRequests: SupportRequest[];
+};

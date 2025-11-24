@@ -3,28 +3,99 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { Button } from "@/components/ui/button";
+import { Package, Database } from "lucide-react";
+import { Link, useLocation } from "wouter";
 import NotFound from "@/pages/not-found";
+import Dashboard from "@/pages/dashboard";
+import RegisterProduct from "@/pages/register-product";
+import ProductDetail from "@/pages/product-detail";
+import SupportRequest from "@/pages/support-request";
+import Brands from "@/pages/brands";
 
 function Router() {
   return (
     <Switch>
-      {/* Add pages below */}
-      {/* <Route path="/" component={Home}/> */}
-      {/* Fallback to 404 */}
+      <Route path="/" component={Dashboard} />
+      <Route path="/registar" component={RegisterProduct} />
+      <Route path="/produto/:id" component={ProductDetail} />
+      <Route path="/produto/:id/suporte" component={SupportRequest} />
+      <Route path="/marcas" component={Brands} />
       <Route component={NotFound} />
     </Switch>
   );
 }
 
-function App() {
+function Navigation() {
+  const [location] = useLocation();
+  
+  const isActive = (path: string) => {
+    if (path === "/" && location === "/") return true;
+    if (path !== "/" && location.startsWith(path)) return true;
+    return false;
+  };
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
-    </QueryClientProvider>
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="flex items-center gap-6">
+          <Link href="/">
+            <div className="flex items-center gap-2 cursor-pointer group" data-testid="link-logo">
+              <div className="p-2 rounded-lg bg-primary text-primary-foreground">
+                <Package className="h-5 w-5" />
+              </div>
+              <span className="font-bold text-lg group-hover:text-primary transition-colors">
+                Warranty Manager
+              </span>
+            </div>
+          </Link>
+          
+          <nav className="hidden md:flex items-center gap-1">
+            <Link href="/">
+              <Button
+                variant={isActive("/") && !location.includes("/produto") && !location.includes("/registar") ? "secondary" : "ghost"}
+                size="sm"
+                data-testid="nav-dashboard"
+              >
+                <Package className="h-4 w-4 mr-2" />
+                Meus Produtos
+              </Button>
+            </Link>
+            <Link href="/marcas">
+              <Button
+                variant={isActive("/marcas") ? "secondary" : "ghost"}
+                size="sm"
+                data-testid="nav-brands"
+              >
+                <Database className="h-4 w-4 mr-2" />
+                Marcas
+              </Button>
+            </Link>
+          </nav>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+        </div>
+      </div>
+    </header>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="light">
+        <TooltipProvider>
+          <div className="min-h-screen bg-background">
+            <Navigation />
+            <Router />
+          </div>
+          <Toaster />
+        </TooltipProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
+}
