@@ -9,8 +9,40 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertBrandSchema, insertProductSchema, insertReviewSchema, insertSupportRequestSchema, insertServiceProviderSchema, insertServiceProviderReviewSchema } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
 
-// Initialize Resend
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Get Resend client from integration
+async function getResendClient() {
+  const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
+  const xReplitToken = process.env.REPL_IDENTITY 
+    ? 'repl ' + process.env.REPL_IDENTITY 
+    : process.env.WEB_REPL_RENEWAL 
+    ? 'depl ' + process.env.WEB_REPL_RENEWAL 
+    : null;
+
+  if (!xReplitToken) {
+    console.warn('X_REPLIT_TOKEN not found, using RESEND_API_KEY fallback');
+    return new Resend(process.env.RESEND_API_KEY);
+  }
+
+  try {
+    const connectionSettings = await fetch(
+      'https://' + hostname + '/api/v2/connection?include_secrets=true&connector_names=resend',
+      {
+        headers: {
+          'Accept': 'application/json',
+          'X_REPLIT_TOKEN': xReplitToken
+        }
+      }
+    ).then(res => res.json()).then(data => data.items?.[0]);
+
+    if (connectionSettings?.settings?.api_key) {
+      return new Resend(connectionSettings.settings.api_key);
+    }
+  } catch (err) {
+    console.warn('Failed to get Resend from integration, using fallback');
+  }
+
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
 // Configure multer for file uploads
 const upload = multer({
@@ -335,7 +367,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let emailSent = false;
       try {
         console.log("Sending email to:", emailContent.to);
-        const emailResponse = await resend.emails.send({
+        const resendClient = await getResendClient();
+        const emailResponse = await resendClient.emails.send({
           from: "noreply@warrantymanager.pt",
           to: emailContent.to,
           subject: emailContent.subject,
