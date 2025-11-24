@@ -490,6 +490,13 @@ export class MemStorage implements IStorage {
         website: "https://www.joccashop.com/pt/",
         category: "Eletrónicos",
       },
+      {
+        name: "Kenwood",
+        supportEmail: "contacto@kenwoodworld.com",
+        supportPhone: "+351-707-201-468",
+        website: "https://www.kenwoodworld.com/pt-pt/",
+        category: "Eletrodomésticos",
+      },
     ];
 
     brands.forEach((brand) => {
