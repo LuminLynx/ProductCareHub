@@ -41,6 +41,11 @@ async function generateWarrantyEmail(product: any, brand: any, issue: any) {
   });
 
   const clientProfile = await storage.getClientProfile();
+  const sentDate = new Date().toLocaleDateString('pt-PT', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
 
   return {
     to: brand.supportEmail,
@@ -77,6 +82,10 @@ Agradeço a vossa atenção e aguardo retorno.
 
 Com os melhores cumprimentos,
 ${clientProfile ? clientProfile.fullName : '[Cliente Warranty Manager]'}
+
+---
+Este pedido de assistência foi processado e enviado através da plataforma Warranty Manager em ${sentDate}.
+Referência de processamento: ${product.id}
     `.trim(),
   };
 }
