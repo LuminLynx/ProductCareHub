@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
-import { Package, Database } from "lucide-react";
+import { Package, Users, History, Plus } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/dashboard";
@@ -14,6 +14,9 @@ import RegisterProduct from "@/pages/register-product";
 import ProductDetail from "@/pages/product-detail";
 import SupportRequest from "@/pages/support-request";
 import Brands from "@/pages/brands";
+import Community from "@/pages/community";
+import SupportHistory from "@/pages/support-history";
+import CreateBrand from "@/pages/create-brand";
 
 function Router() {
   return (
@@ -23,6 +26,9 @@ function Router() {
       <Route path="/produto/:id" component={ProductDetail} />
       <Route path="/produto/:id/suporte" component={SupportRequest} />
       <Route path="/marcas" component={Brands} />
+      <Route path="/marcas/criar" component={CreateBrand} />
+      <Route path="/comunidade" component={Community} />
+      <Route path="/historico-reclamacoes" component={SupportHistory} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -69,8 +75,28 @@ function Navigation() {
                 size="sm"
                 data-testid="nav-brands"
               >
-                <Database className="h-4 w-4 mr-2" />
+                <Package className="h-4 w-4 mr-2" />
                 Marcas
+              </Button>
+            </Link>
+            <Link href="/comunidade">
+              <Button
+                variant={isActive("/comunidade") ? "secondary" : "ghost"}
+                size="sm"
+                data-testid="nav-community"
+              >
+                <Users className="h-4 w-4 mr-2" />
+                Comunidade
+              </Button>
+            </Link>
+            <Link href="/historico-reclamacoes">
+              <Button
+                variant={isActive("/historico") ? "secondary" : "ghost"}
+                size="sm"
+                data-testid="nav-history"
+              >
+                <History className="h-4 w-4 mr-2" />
+                Histórico
               </Button>
             </Link>
           </nav>

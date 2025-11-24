@@ -322,6 +322,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // PUBLIC COMMUNITY ROUTES
+  app.get("/api/community/reviews", async (req, res) => {
+    try {
+      const reviews = await storage.getAllReviews();
+      const productsWithBrands = await Promise.all(
+        reviews.map(async (review) => {
+          const product = await storage.getProductWithBrand(review.productId);
+          return product ? { ...review, product } : null;
+        })
+      );
+      res.json(productsWithBrands.filter(r => r !== null));
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch community reviews" });
+    }
+  });
+
+  // SUPPORT HISTORY ROUTES (all support requests with product info)
+  app.get("/api/support-history", async (req, res) => {
+    try {
+      const requests = await storage.getAllSupportRequests();
+      const requestsWithDetails = await Promise.all(
+        requests.map(async (request) => {
+          const product = await storage.getProductWithBrand(request.productId);
+          return product ? { ...request, product } : null;
+        })
+      );
+      res.json(requestsWithDetails.filter(r => r !== null));
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch support history" });
+    }
+  });
+
+  // SEARCH ROUTES
+  app.get("/api/search", async (req, res) => {
+    try {
+      const query = req.query.q as string;
+      if (!query || query.length < 2) {
+        return res.json({ products: [], brands: [] });
+      }
+
+      const [products, brands] = await Promise.all([
+        storage.searchProducts(query),
+        storage.searchBrands(query),
+      ]);
+
+      res.json({ products, brands });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to search" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
