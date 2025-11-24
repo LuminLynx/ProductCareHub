@@ -56,20 +56,13 @@ export default function SupportRequest() {
 
   const onSubmit = () => {
     const formValues = form.getValues();
-    console.log("Form values:", formValues);
-    console.log("Form errors:", form.formState.errors);
-    
-    // Validate required fields
-    if (!formValues.productId || !formValues.issueDescription || !formValues.category || !formValues.severity) {
-      toast({
-        title: "Erro",
-        description: "Por favor, preencha todos os campos obrigatórios.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    sendSupportRequest.mutate(formValues);
+    console.log("Submitting support request:", formValues);
+    sendSupportRequest.mutate({
+      productId: id,
+      issueDescription: formValues.issueDescription,
+      category: formValues.category,
+      severity: formValues.severity
+    });
   };
 
   if (!product) {
