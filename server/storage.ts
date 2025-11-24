@@ -224,6 +224,13 @@ export class MemStorage implements IStorage {
         website: "https://www.beko.pt/",
         category: "Eletrodomésticos",
       },
+      {
+        name: "Bluesens",
+        supportEmail: "posvenda@bluesens.com",
+        supportPhone: "+351-226-108-030",
+        website: "https://www.bluesens.com/",
+        category: "Eletrodomésticos",
+      },
     ];
 
     brands.forEach((brand) => {
