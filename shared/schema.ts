@@ -152,7 +152,6 @@ export const insertBrandSchema = createInsertSchema(brands).omit({
 
 export const insertProductSchema = createInsertSchema(products).omit({
   id: true,
-  warrantyExpiration: true, // Calculated on backend
 }).extend({
   purchaseDate: z.string().or(z.date()), // Accept both formats
   receiptUrl: z.string().nullable().optional(),
