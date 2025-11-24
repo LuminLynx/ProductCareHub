@@ -420,6 +420,13 @@ export class MemStorage implements IStorage {
         website: "https://www.groundtec.com.pt/",
         category: "Equipamentos Construtivos",
       },
+      {
+        name: "Lovit",
+        supportEmail: "lovit@lovit.com.pt",
+        supportPhone: "+351-227-133-368",
+        website: "https://www.lovit.com.pt/",
+        category: "Equipamentos",
+      },
     ];
 
     brands.forEach((brand) => {
