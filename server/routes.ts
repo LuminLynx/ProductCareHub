@@ -3,10 +3,14 @@ import { createServer, type Server } from "http";
 import multer from "multer";
 import path from "path";
 import PDFDocument from "pdfkit";
+import { Resend } from "resend";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertBrandSchema, insertProductSchema, insertReviewSchema, insertSupportRequestSchema, insertServiceProviderSchema, insertServiceProviderReviewSchema } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
+
+// Initialize Resend
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Configure multer for file uploads
 const upload = multer({
@@ -325,22 +329,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Generate email content
-      const emailContent = generateWarrantyEmail(product, product.brand, result.data);
+      const emailContent = await generateWarrantyEmail(product, product.brand, result.data);
       
-      // In a real implementation, you would send the email here
-      // For now, we'll just log it
-      console.log("=== WARRANTY CLAIM EMAIL ===");
-      console.log(`To: ${emailContent.to}`);
-      console.log(`Subject: ${emailContent.subject}`);
-      console.log(`Body:\n${emailContent.body}`);
-      console.log("===========================");
+      // Send email via Resend
+      let emailSent = false;
+      try {
+        console.log("Sending email to:", emailContent.to);
+        const emailResponse = await resend.emails.send({
+          from: "noreply@warrantymanager.pt",
+          to: emailContent.to,
+          subject: emailContent.subject,
+          text: emailContent.body,
+        });
+        
+        if (emailResponse.error) {
+          console.error("Resend error:", emailResponse.error);
+        } else {
+          emailSent = true;
+          console.log("Email sent successfully with ID:", emailResponse.data?.id);
+        }
+      } catch (emailError) {
+        console.error("Failed to send email:", emailError);
+      }
 
       // Create support request record
       const supportRequest = await storage.createSupportRequest(result.data);
       
       res.status(201).json({
         supportRequest,
-        emailSent: true,
+        emailSent,
         emailDetails: {
           to: emailContent.to,
           subject: emailContent.subject,
