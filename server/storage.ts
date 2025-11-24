@@ -315,6 +315,13 @@ export class MemStorage implements IStorage {
         website: "https://www.delta.pt/",
         category: "Eletrodomésticos",
       },
+      {
+        name: "Delba",
+        supportEmail: "assistenciatecnica@sacrofil.pt",
+        supportPhone: "+351-214-250-000",
+        website: "https://www.delba.pt/",
+        category: "Eletrodomésticos",
+      },
     ];
 
     brands.forEach((brand) => {
