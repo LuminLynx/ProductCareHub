@@ -196,6 +196,13 @@ export class MemStorage implements IStorage {
         website: "https://www.teka.pt/servico-tecnico/",
         category: "Eletrodomésticos",
       },
+      {
+        name: "Ariston",
+        supportEmail: "info@ariston.pt",
+        supportPhone: "+351-213-180-900",
+        website: "https://www.ariston.com/pt-PT/",
+        category: "Eletrodomésticos",
+      },
     ];
 
     brands.forEach((brand) => {
