@@ -392,6 +392,13 @@ export class MemStorage implements IStorage {
         website: "https://www.energysytem.es/",
         category: "Eletrónicos",
       },
+      {
+        name: "Flama",
+        supportEmail: "info@flama.pt",
+        supportPhone: "+351-808-250-178",
+        website: "https://www.flama.pt",
+        category: "Eletrodomésticos",
+      },
     ];
 
     brands.forEach((brand) => {
