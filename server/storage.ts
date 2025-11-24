@@ -371,6 +371,13 @@ export class MemStorage implements IStorage {
         website: "https://www.electrolux.pt/support/contact-us/",
         category: "Eletrodomésticos",
       },
+      {
+        name: "Emtec",
+        supportEmail: "support.emtec@dexxon.eu",
+        supportPhone: "+33-147-291-900",
+        website: "https://www.emtec-international.com/",
+        category: "Produtos Tecnológicos",
+      },
     ];
 
     brands.forEach((brand) => {
