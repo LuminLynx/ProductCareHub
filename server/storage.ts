@@ -462,6 +462,13 @@ export class MemStorage implements IStorage {
         website: "https://www.indesit.pt/",
         category: "Eletrodomésticos",
       },
+      {
+        name: "Ariston",
+        supportEmail: "contacto@ariston.pt",
+        supportPhone: "+351-219-605-300",
+        website: "https://www.ariston.com/pt-pt/",
+        category: "Eletrodomésticos",
+      },
     ];
 
     brands.forEach((brand) => {
