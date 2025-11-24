@@ -17,12 +17,15 @@ export interface IStorage {
   getBrand(id: string): Promise<Brand | undefined>;
   getAllBrands(): Promise<Brand[]>;
   createBrand(brand: InsertBrand): Promise<Brand>;
+  searchBrands(query: string): Promise<Brand[]>;
 
   // Products
   getProduct(id: string): Promise<Product | undefined>;
   getProductWithBrand(id: string): Promise<ProductWithBrand | undefined>;
   getProductWithDetails(id: string): Promise<ProductWithDetails | undefined>;
   getAllProducts(): Promise<ProductWithBrand[]>;
+  getProductsByBrand(brandId: string): Promise<ProductWithBrand[]>;
+  searchProducts(query: string): Promise<ProductWithBrand[]>;
   createProduct(product: InsertProduct): Promise<Product>;
   updateProduct(id: string, product: Partial<Product>): Promise<Product | undefined>;
   deleteProduct(id: string): Promise<boolean>;
@@ -30,11 +33,13 @@ export interface IStorage {
   // Reviews
   getReview(id: string): Promise<Review | undefined>;
   getReviewsByProduct(productId: string): Promise<Review[]>;
+  getAllReviews(): Promise<Review[]>;
   createReview(review: InsertReview): Promise<Review>;
 
   // Support Requests
   getSupportRequest(id: string): Promise<SupportRequest | undefined>;
   getSupportRequestsByProduct(productId: string): Promise<SupportRequest[]>;
+  getAllSupportRequests(): Promise<SupportRequest[]>;
   createSupportRequest(request: InsertSupportRequest): Promise<SupportRequest>;
   updateSupportRequest(id: string, request: Partial<SupportRequest>): Promise<SupportRequest | undefined>;
 }
@@ -151,6 +156,14 @@ export class MemStorage implements IStorage {
     return brand;
   }
 
+  async searchBrands(query: string): Promise<Brand[]> {
+    const lowerQuery = query.toLowerCase();
+    return Array.from(this.brands.values())
+      .filter(brand => brand.name.toLowerCase().includes(lowerQuery) || 
+                      brand.category.toLowerCase().includes(lowerQuery))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
+
   // Products
   async getProduct(id: string): Promise<Product | undefined> {
     return this.products.get(id);
@@ -181,6 +194,33 @@ export class MemStorage implements IStorage {
 
   async getAllProducts(): Promise<ProductWithBrand[]> {
     const products = Array.from(this.products.values());
+    const productsWithBrands = await Promise.all(
+      products.map(async (product) => {
+        const brand = await this.getBrand(product.brandId);
+        if (!brand) return null;
+        return { ...product, brand };
+      })
+    );
+
+    return productsWithBrands.filter((p): p is ProductWithBrand => p !== null)
+      .sort((a, b) => new Date(b.purchaseDate).getTime() - new Date(a.purchaseDate).getTime());
+  }
+
+  async getProductsByBrand(brandId: string): Promise<ProductWithBrand[]> {
+    const products = Array.from(this.products.values()).filter(p => p.brandId === brandId);
+    const brand = await this.getBrand(brandId);
+    if (!brand) return [];
+    
+    return products.map(p => ({ ...p, brand }))
+      .sort((a, b) => new Date(b.purchaseDate).getTime() - new Date(a.purchaseDate).getTime());
+  }
+
+  async searchProducts(query: string): Promise<ProductWithBrand[]> {
+    const lowerQuery = query.toLowerCase();
+    const products = Array.from(this.products.values())
+      .filter(p => p.name.toLowerCase().includes(lowerQuery) || 
+                   p.model.toLowerCase().includes(lowerQuery));
+    
     const productsWithBrands = await Promise.all(
       products.map(async (product) => {
         const brand = await this.getBrand(product.brandId);
@@ -244,6 +284,11 @@ export class MemStorage implements IStorage {
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
+  async getAllReviews(): Promise<Review[]> {
+    return Array.from(this.reviews.values())
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
   async createReview(insertReview: InsertReview): Promise<Review> {
     const id = randomUUID();
     const review: Review = {
@@ -265,6 +310,11 @@ export class MemStorage implements IStorage {
   async getSupportRequestsByProduct(productId: string): Promise<SupportRequest[]> {
     return Array.from(this.supportRequests.values())
       .filter(request => request.productId === productId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async getAllSupportRequests(): Promise<SupportRequest[]> {
+    return Array.from(this.supportRequests.values())
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
