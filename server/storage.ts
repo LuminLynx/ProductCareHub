@@ -427,6 +427,13 @@ export class MemStorage implements IStorage {
         website: "https://www.lovit.com.pt/",
         category: "Equipamentos",
       },
+      {
+        name: "Grunkel",
+        supportEmail: "repuestos@cointer.com",
+        supportPhone: "+34-954-182-404",
+        website: "https://grunkel.com",
+        category: "Eletrónicos",
+      },
     ];
 
     brands.forEach((brand) => {
