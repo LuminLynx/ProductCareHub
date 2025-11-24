@@ -149,7 +149,7 @@ export class MemStorage implements IStorage {
       },
       {
         name: "Bosch",
-        supportEmail: "bosch-pt@bshg.com",
+        supportEmail: "bshp.repacao@bshg.com",
         supportPhone: "+351-214-250-730",
         website: "https://www.bosch-home.pt/servico",
         category: "Eletrodomésticos",
