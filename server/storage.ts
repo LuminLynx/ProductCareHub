@@ -455,6 +455,13 @@ export class MemStorage implements IStorage {
         website: "https://www.insys.pt/",
         category: "Computadores",
       },
+      {
+        name: "Indesit",
+        supportEmail: "apoio@indesit.pt",
+        supportPhone: "+351-219-406-200",
+        website: "https://www.indesit.pt/",
+        category: "Eletrodomésticos",
+      },
     ];
 
     brands.forEach((brand) => {
