@@ -378,6 +378,13 @@ export class MemStorage implements IStorage {
         website: "https://www.emtec-international.com/",
         category: "Produtos Tecnológicos",
       },
+      {
+        name: "Energizer",
+        supportEmail: "geral@tametgroup.com",
+        supportPhone: "+351-229-059-430",
+        website: "https://energizer.com/eu/portugal/",
+        category: "Baterias e Iluminação",
+      },
     ];
 
     brands.forEach((brand) => {
