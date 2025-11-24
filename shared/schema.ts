@@ -23,6 +23,7 @@ export const products = pgTable("products", {
   serialNumber: text("serial_number"),
   category: text("category").notNull(),
   purchaseDate: timestamp("purchase_date").notNull(),
+  store: text("store"), // Store where product was purchased
   warrantyExpiration: timestamp("warranty_expiration").notNull(),
   receiptUrl: text("receipt_url"),
   photoUrls: text("photo_urls").array().default(sql`'{}'::text[]`),
